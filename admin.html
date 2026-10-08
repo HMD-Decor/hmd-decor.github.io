@@ -487,27 +487,33 @@ if(
 ){
 
   document.getElementById(
-    "loginStatus"
-  ).textContent =
-    "❌ STORAGE_BUCKET غير موجود.";
-
-}else if(
-  !window.supabase
-){
-
-  document.getElementById(
-    "loginStatus"
-  ).textContent =
-    "❌ مكتبة Supabase لم يتم تحميلها.";
-
-}else{
-
-  client =
+    "loginStatus"client =
     window.supabase.createClient(
       window.HMD_CONFIG.SUPABASE_URL,
       window.HMD_CONFIG.SUPABASE_ANON_KEY
     );
+// حماية لوحة الإدارة
+(async function(){
 
+  const {
+    data: { session }
+  } = await client.auth.getSession();
+
+  if(!session){
+    window.location.href = "login.html";
+    return;
+  }
+
+  if(
+    session.user.id !== ADMIN_UID ||
+    session.user.email !== ADMIN_EMAIL
+  ){
+    await client.auth.signOut();
+    window.location.href = "login.html";
+    return;
+  }
+
+})();
   BUCKET =
     window.HMD_CONFIG.STORAGE_BUCKET;
 
@@ -578,6 +584,21 @@ async function checkSession(){
 
   }
 
+  ).textContent =
+    "❌ STORAGE_BUCKET غير موجود.";
+
+}else if(
+  !window.supabase
+){
+
+  document.getElementById(
+    "loginStatus"
+  ).textContent =
+    "❌ مكتبة Supabase لم يتم تحميلها.";
+
+}else{
+
+  
 }
 
 
