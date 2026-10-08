@@ -606,6 +606,7 @@ width:100%
 }
 </style>
 </head>
+
 <body>
 
 <header>
@@ -617,9 +618,20 @@ HMD DÉCOR
 </a>
 
 <nav>
+
 <a href="#services">خدماتنا</a>
+
 <a href="#projects">أعمالنا</a>
+
 <a href="#contact">اتصل بنا</a>
+
+<a
+href="login.html"
+id="adminButton"
+class="admin-link"
+style="display:none;">
+🔐 الإدارة
+</a>
 
 </nav>
 
@@ -711,6 +723,7 @@ rel="noopener">
 
 </div>
 </section>
+
 <section id="projects" class="projects">
 
 <div class="section-title">
@@ -726,9 +739,11 @@ rel="noopener">
 </div>
 
 <div class="gallery" id="gallery">
+
 <div class="loading">
 جاري تحميل الصور والفيديوهات...
 </div>
+
 </div>
 
 </section>
@@ -1228,7 +1243,8 @@ console.error(error);
 }
 
 }
-  
+
+
 const lightbox=document.getElementById("lightbox");
 
 const lightboxContent=document.getElementById("lightboxContent");
@@ -1406,6 +1422,47 @@ document.getElementById("hero").textContent=
 DEFAULTS.hero;
 
 return;
+
+}
+
+
+/* =========================
+   إظهار زر الإدارة للمالك فقط
+========================= */
+
+try{
+
+const{
+data:{
+session
+}
+}=await supabaseClient.auth.getSession();
+
+
+if(
+session &&
+session.user &&
+session.user.id==="03459448-2358-4234-a132-edb18b822795" &&
+session.user.email==="midomidox447@gmail.com"
+){
+
+const adminButton=
+document.getElementById("adminButton");
+
+if(adminButton){
+
+adminButton.style.display="inline-flex";
+
+}
+
+}
+
+}catch(error){
+
+console.error(
+"Admin session check error:",
+error
+);
 
 }
 
