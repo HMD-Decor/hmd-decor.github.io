@@ -1,0 +1,1605 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>HMD Décor | الإدارة</title>
+
+<style>
+:root{
+  --g:#c9a45c;
+  --bg:#0b0b0b;
+  --c:#151515;
+  --b:#2c2c2c;
+  --danger:#762b2b;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:#eee;
+  font-family:Arial,Tahoma,sans-serif;
+}
+
+.wrap{
+  max-width:1050px;
+  margin:auto;
+  padding:22px;
+}
+
+.head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  border-bottom:1px solid var(--b);
+  padding-bottom:15px;
+}
+
+.head h1{
+  color:var(--g);
+  margin:0;
+}
+
+a{
+  color:var(--g);
+  text-decoration:none;
+}
+
+.panel{
+  background:var(--c);
+  border:1px solid var(--b);
+  border-radius:10px;
+  padding:20px;
+  margin:18px 0;
+}
+
+.login{
+  max-width:480px;
+  margin:70px auto;
+}
+
+.login h1{
+  text-align:center;
+  color:var(--g);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+label{
+  display:block;
+  color:var(--g);
+  margin:8px 0;
+}
+
+input,
+textarea,
+button{
+  width:100%;
+  padding:12px;
+  border-radius:6px;
+  border:1px solid #383838;
+  background:#0e0e0e;
+  color:#fff;
+  font-size:15px;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+button{
+  background:var(--g);
+  color:#111;
+  border:0;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:8px;
+}
+
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.danger{
+  background:var(--danger);
+  color:#fff;
+}
+
+.logout{
+  background:#333;
+  color:#fff;
+  width:auto;
+  padding:9px 15px;
+}
+
+.siteButton{
+  display:inline-block;
+  background:var(--g);
+  color:#111;
+  padding:9px 15px;
+  border-radius:6px;
+  text-decoration:none;
+  font-weight:bold;
+  margin:0 5px;
+}
+
+.siteButton:hover{
+  opacity:.9;
+}
+
+.media{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:18px;
+}
+
+.item{
+  border:1px solid var(--b);
+  padding:10px;
+  border-radius:8px;
+  background:#101010;
+}
+
+.item img,
+.item video{
+  width:100%;
+  height:170px;
+  object-fit:cover;
+  border-radius:6px;
+  display:block;
+}
+
+.filename{
+  color:#aaa;
+  font-size:12px;
+  margin-top:8px;
+  word-break:break-word;
+}
+
+.muted{
+  color:#aaa;
+  font-size:13px;
+  line-height:1.7;
+}
+
+.status{
+  margin-top:12px;
+  color:#9bd58a;
+  line-height:1.7;
+}
+
+.error{
+  color:#ff8585;
+}
+
+.loading{
+  color:var(--g);
+  padding:15px 0;
+}
+
+.user{
+  color:#aaa;
+  font-size:13px;
+  margin-left:5px;
+}
+
+.adminActions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+#adminArea{
+  display:none;
+}
+
+@media(max-width:700px){
+
+  .grid,
+  .media{
+    grid-template-columns:1fr;
+  }
+
+  .head{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .adminActions{
+    width:100%;
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .user{
+    display:block;
+    text-align:center;
+    margin-bottom:5px;
+  }
+
+  .siteButton,
+  .logout{
+    width:100%;
+    text-align:center;
+    margin:3px 0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+
+<!-- =========================
+     تسجيل الدخول
+========================= -->
+
+<div id="loginArea" class="wrap">
+
+  <div class="panel login">
+
+    <h1>HMD Décor</h1>
+
+    <h2>🔐 لوحة الإدارة</h2>
+
+    <p class="muted">
+      سجل الدخول للوصول إلى لوحة التحكم.
+    </p>
+
+    <label>البريد الإلكتروني</label>
+
+    <input
+      type="email"
+      id="loginEmail"
+      placeholder="البريد الإلكتروني"
+      autocomplete="email"
+    >
+
+    <label>كلمة السر</label>
+
+    <input
+      type="password"
+      id="loginPassword"
+      placeholder="كلمة السر"
+      autocomplete="current-password"
+    >
+
+    <button onclick="login()">
+      دخول
+    </button>
+
+    <div id="loginStatus" class="status"></div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     لوحة الإدارة
+========================= -->
+
+<div id="adminArea">
+
+<div class="wrap">
+
+<div class="head">
+
+  <h1>HMD Décor</h1>
+
+  <div class="adminActions">
+
+    <span id="userEmail" class="user"></span>
+
+    <a
+      href="index.html"
+      class="siteButton">
+      🏠 الموقع الرئيسي
+    </a>
+
+    <button
+      class="logout"
+      onclick="logout()">
+      تسجيل الخروج
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     إعدادات الاتصال
+========================= -->
+
+<div class="panel">
+
+<h2>إعدادات الاتصال</h2>
+
+<div class="grid">
+
+<div>
+<label>الهاتف</label>
+<input id="phone" placeholder="+213 ...">
+</div>
+
+<div>
+<label>واتساب</label>
+<input id="wa" placeholder="213...">
+</div>
+
+<div>
+<label>البريد</label>
+<input id="email" placeholder="contact@...">
+</div>
+
+<div>
+<label>العنوان</label>
+<input id="address" placeholder="مشرية وما جاورها">
+</div>
+
+</div>
+
+<label>النص الرئيسي</label>
+
+<textarea id="hero"></textarea>
+
+<button
+  id="saveSettingsButton"
+  onclick="saveSettings()">
+  حفظ الإعدادات
+</button>
+
+<div id="settingsStatus" class="status"></div>
+
+</div>
+
+
+<!-- =========================
+     الصور والفيديوهات
+========================= -->
+
+<div class="panel">
+
+<h2>الصور والفيديوهات</h2>
+
+<p class="muted">
+الصور والفيديوهات يتم تخزينها في Supabase Storage.
+</p>
+
+<input
+  type="file"
+  id="files"
+  multiple
+  accept="image/*,video/*"
+>
+
+<button
+  id="uploadButton"
+  onclick="uploadFiles()">
+  رفع الملفات
+</button>
+
+<div id="uploadStatus" class="status"></div>
+
+<div id="list" class="media"></div>
+
+</div>
+
+
+<!-- =========================
+     حالة الربط
+========================= -->
+
+<div class="panel">
+
+<h2>حالة الربط</h2>
+
+<p id="connectionStatus" class="status">
+جاري تشغيل لوحة الإدارة...
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+
+<script>
+
+"use strict";
+
+
+/* =========================
+   Supabase
+========================= */
+
+let client = null;
+
+let BUCKET = null;
+
+let adminReady = false;
+
+
+const statusBox =
+document.getElementById(
+  "connectionStatus"
+);
+
+
+function setStatus(
+  message,
+  error=false
+){
+
+  if(!statusBox) return;
+
+  statusBox.className =
+    error
+    ? "status error"
+    : "status";
+
+  statusBox.textContent =
+    message;
+}
+
+
+/* =========================
+   التحقق من الإعدادات
+========================= */
+
+if(
+  !window.HMD_CONFIG
+){
+
+  document.getElementById(
+    "loginStatus"
+  ).textContent =
+    "❌ لم يتم تحميل config.js.";
+
+}else if(
+  !window.HMD_CONFIG.SUPABASE_URL
+){
+
+  document.getElementById(
+    "loginStatus"
+  ).textContent =
+    "❌ SUPABASE_URL غير موجود.";
+
+}else if(
+  !window.HMD_CONFIG.SUPABASE_ANON_KEY
+){
+
+  document.getElementById(
+    "loginStatus"
+  ).textContent =
+    "❌ SUPABASE_ANON_KEY غير موجود.";
+
+}else if(
+  !window.HMD_CONFIG.STORAGE_BUCKET
+){
+
+  document.getElementById(
+    "loginStatus"
+  ).textContent =
+    "❌ STORAGE_BUCKET غير موجود.";
+
+}else if(
+  !window.supabase
+){
+
+  document.getElementById(
+    "loginStatus"
+  ).textContent =
+    "❌ مكتبة Supabase لم يتم تحميلها.";
+
+}else{
+
+  client =
+    window.supabase.createClient(
+      window.HMD_CONFIG.SUPABASE_URL,
+      window.HMD_CONFIG.SUPABASE_ANON_KEY
+    );
+
+  BUCKET =
+    window.HMD_CONFIG.STORAGE_BUCKET;
+
+  window.HMD_SUPABASE =
+    client;
+
+  window.HMD_BUCKET =
+    BUCKET;
+
+  checkSession();
+
+}
+
+
+/* =========================
+   التحقق من تسجيل الدخول
+========================= */
+
+async function checkSession(){
+
+  if(!client) return;
+
+  try{
+
+    const result =
+      await client.auth.getSession();
+
+    if(result.error){
+
+      console.error(
+        result.error
+      );
+
+      document.getElementById(
+        "loginStatus"
+      ).textContent =
+        "❌ تعذر التحقق من تسجيل الدخول.";
+
+      return;
+
+    }
+
+    const session =
+      result.data.session;
+
+    if(session){
+
+      showAdmin(
+        session.user
+      );
+
+    }else{
+
+      showLogin();
+
+    }
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+    document.getElementById(
+      "loginStatus"
+    ).textContent =
+      "❌ حدث خطأ في الاتصال.";
+
+  }
+
+}
+
+
+/* =========================
+   تسجيل الدخول
+========================= */
+
+async function login(){
+
+  if(!client){
+
+    return;
+
+  }
+
+  const email =
+    document.getElementById(
+      "loginEmail"
+    ).value.trim();
+
+  const password =
+    document.getElementById(
+      "loginPassword"
+    ).value;
+
+
+  const status =
+    document.getElementById(
+      "loginStatus"
+    );
+
+
+  if(!email || !password){
+
+    status.className =
+      "status error";
+
+    status.textContent =
+      "أدخل البريد الإلكتروني وكلمة السر.";
+
+    return;
+
+  }
+
+
+  status.className =
+    "status";
+
+  status.textContent =
+    "جاري تسجيل الدخول...";
+
+
+  try{
+
+    const result =
+      await client.auth.signInWithPassword({
+
+        email:email,
+
+        password:password
+
+      });
+
+
+    if(result.error){
+
+      status.className =
+        "status error";
+
+      status.textContent =
+        "❌ " +
+        result.error.message;
+
+      return;
+
+    }
+
+
+    showAdmin(
+      result.data.user
+    );
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+    status.className =
+      "status error";
+
+    status.textContent =
+      "❌ حدث خطأ أثناء تسجيل الدخول.";
+
+  }
+
+}
+
+
+/* =========================
+   عرض لوحة الإدارة
+========================= */
+
+async function showAdmin(user){
+
+  document.getElementById(
+    "loginArea"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "adminArea"
+  ).style.display =
+    "block";
+
+
+  document.getElementById(
+    "userEmail"
+  ).textContent =
+    user.email || "";
+
+
+  if(adminReady){
+
+    return;
+
+  }
+
+
+  adminReady = true;
+
+
+  setStatus(
+    "جاري الاتصال بـ Supabase..."
+  );
+
+
+  await loadSettings();
+
+  await checkConnection();
+
+}
+
+
+/* =========================
+   إظهار الدخول
+========================= */
+
+function showLogin(){
+
+  adminReady = false;
+
+  document.getElementById(
+    "loginArea"
+  ).style.display =
+    "block";
+
+
+  document.getElementById(
+    "adminArea"
+  ).style.display =
+    "none";
+
+}
+
+
+/* =========================
+   تسجيل الخروج
+========================= */
+
+async function logout(){
+
+  if(!client) return;
+
+  await client.auth.signOut();
+
+  showLogin();
+
+}
+
+
+/* =========================
+   فحص الاتصال
+========================= */
+
+async function checkConnection(){
+
+  if(!client) return;
+
+  try{
+
+    const timeout =
+      new Promise(
+        (_,reject) => {
+
+          setTimeout(
+            () => reject(
+              new Error(
+                "انتهت مهلة الاتصال."
+              )
+            ),
+            10000
+          );
+
+        }
+      );
+
+
+    const request =
+      client.storage
+      .from(BUCKET)
+      .list("",{
+        limit:1
+      });
+
+
+    const result =
+      await Promise.race([
+        request,
+        timeout
+      ]);
+
+
+    if(result.error){
+
+      setStatus(
+        "❌ Supabase رفض الطلب: " +
+        result.error.message,
+        true
+      );
+
+      return;
+
+    }
+
+
+    setStatus(
+      "✅ Supabase متصل بنجاح"
+    );
+
+
+    await loadFiles();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+    setStatus(
+      "❌ فشل الاتصال: " +
+      error.message,
+      true
+    );
+
+  }
+
+}
+
+
+/* =========================
+   الإعدادات
+========================= */
+
+const defaultSettings = {
+
+  phone:"+213 XX XX XX XX",
+
+  wa:"213000000000",
+
+  email:"contact@hmddecor.dz",
+
+  address:"مشرية وما جاورها",
+
+  hero:
+  "نصمم مساحات تجمع بين الفخامة والراحة واللمسة الشخصية."
+
+};
+
+
+/* =========================
+   تحميل الإعدادات من Supabase
+========================= */
+
+async function loadSettings(){
+
+  const data =
+    {
+      ...defaultSettings
+    };
+
+
+  try{
+
+    const result =
+      await client
+      .from("site_settings")
+      .select("key,value");
+
+
+    if(result.error){
+
+      console.error(
+        "Settings load error:",
+        result.error
+      );
+
+    }else{
+
+      const rows =
+        result.data || [];
+
+
+      rows.forEach(
+        row => {
+
+          if(
+            row &&
+            row.key
+          ){
+
+            data[row.key] =
+              row.value || "";
+
+          }
+
+        }
+      );
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+  }
+
+
+  document.getElementById(
+    "phone"
+  ).value =
+    data.phone;
+
+
+  document.getElementById(
+    "wa"
+  ).value =
+    data.wa;
+
+
+  document.getElementById(
+    "email"
+  ).value =
+    data.email;
+
+
+  document.getElementById(
+    "address"
+  ).value =
+    data.address;
+
+
+  document.getElementById(
+    "hero"
+  ).value =
+    data.hero;
+
+}
+
+
+/* =========================
+   حفظ الإعدادات في Supabase
+========================= */
+
+async function saveSettings(){
+
+  if(!client){
+
+    return;
+
+  }
+
+
+  const status =
+    document.getElementById(
+      "settingsStatus"
+    );
+
+
+  const button =
+    document.getElementById(
+      "saveSettingsButton"
+    );
+
+
+  const settings = [
+
+    {
+      key:"phone",
+
+      value:
+        document
+        .getElementById("phone")
+        .value
+        .trim()
+
+    },
+
+    {
+      key:"wa",
+
+      value:
+        document
+        .getElementById("wa")
+        .value
+        .trim()
+
+    },
+
+    {
+      key:"email",
+
+      value:
+        document
+        .getElementById("email")
+        .value
+        .trim()
+
+    },
+
+    {
+      key:"address",
+
+      value:
+        document
+        .getElementById("address")
+        .value
+        .trim()
+
+    },
+
+    {
+      key:"hero",
+
+      value:
+        document
+        .getElementById("hero")
+        .value
+        .trim()
+
+    }
+
+  ];
+
+
+  status.className =
+    "status";
+
+  status.textContent =
+    "جاري حفظ الإعدادات...";
+
+
+  button.disabled = true;
+
+
+  try{
+
+    const result =
+      await client
+      .from("site_settings")
+      .upsert(
+        settings,
+        {
+          onConflict:"key"
+        }
+      );
+
+
+    if(result.error){
+
+      console.error(
+        result.error
+      );
+
+      status.className =
+        "status error";
+
+      status.textContent =
+        "❌ لم يتم الحفظ: " +
+        result.error.message;
+
+      return;
+
+    }
+
+
+    status.className =
+      "status";
+
+    status.textContent =
+      "✅ تم حفظ الإعدادات في Supabase";
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+    status.className =
+      "status error";
+
+    status.textContent =
+      "❌ حدث خطأ أثناء الحفظ.";
+
+  }finally{
+
+    button.disabled = false;
+
+  }
+
+}
+
+
+/* =========================
+   رفع الملفات
+========================= */
+
+async function uploadFiles(){
+
+  if(!client) return;
+
+
+  const input =
+    document.getElementById(
+      "files"
+    );
+
+
+  const status =
+    document.getElementById(
+      "uploadStatus"
+    );
+
+
+  const button =
+    document.getElementById(
+      "uploadButton"
+    );
+
+
+  const files =
+    [...input.files];
+
+
+  if(!files.length){
+
+    status.className =
+      "status error";
+
+    status.textContent =
+      "اختر صورة أو فيديو أولًا.";
+
+    return;
+
+  }
+
+
+  status.className =
+    "status";
+
+  status.textContent =
+    "جاري رفع الملفات...";
+
+
+  button.disabled = true;
+
+
+  let success=0;
+
+  let failed=0;
+
+
+  for(
+    const file of files
+  ){
+
+    try{
+
+      const cleanName =
+        file.name
+        .replace(
+          /[^\w.\-() ]/g,
+          "_"
+        )
+        .replace(
+          /\s+/g,
+          "_"
+        );
+
+
+      const path =
+        Date.now() +
+        "_" +
+        Math.random()
+        .toString(36)
+        .slice(2,8) +
+        "_" +
+        cleanName;
+
+
+      const result =
+        await client.storage
+        .from(BUCKET)
+        .upload(
+          path,
+          file,
+          {
+            cacheControl:"3600",
+            upsert:false,
+            contentType:file.type
+          }
+        );
+
+
+      if(result.error){
+
+        console.error(
+          result.error
+        );
+
+        failed++;
+
+      }else{
+
+        success++;
+
+      }
+
+
+    }catch(error){
+
+      console.error(
+        error
+      );
+
+      failed++;
+
+    }
+
+  }
+
+
+  input.value="";
+
+
+  status.className =
+    failed
+    ? "status error"
+    : "status";
+
+
+  status.textContent =
+    "تم رفع " +
+    success +
+    " ملف ✓" +
+    (
+      failed
+      ? " — فشل " +
+        failed +
+        " ملف"
+      : ""
+    );
+
+
+  button.disabled = false;
+
+
+  await loadFiles();
+
+}
+
+
+/* =========================
+   عرض الملفات
+========================= */
+
+async function loadFiles(){
+
+  if(!client) return;
+
+
+  const list =
+    document.getElementById(
+      "list"
+    );
+
+
+  list.innerHTML =
+    '<div class="loading">جاري تحميل الملفات...</div>';
+
+
+  try{
+
+    const result =
+      await client.storage
+      .from(BUCKET)
+      .list(
+        "",
+        {
+          limit:100,
+
+          sortBy:{
+            column:"created_at",
+            order:"desc"
+          }
+
+        }
+      );
+
+
+    if(result.error){
+
+      list.innerHTML =
+        '<div class="status error">' +
+        escapeHtml(
+          result.error.message
+        ) +
+        '</div>';
+
+      return;
+
+    }
+
+
+    const files =
+      result.data || [];
+
+
+    if(!files.length){
+
+      list.innerHTML =
+        '<p class="muted">لا توجد ملفات حتى الآن.</p>';
+
+      return;
+
+    }
+
+
+    list.innerHTML="";
+
+
+    files.forEach(
+      file => {
+
+        if(!file.name)
+          return;
+
+
+        const publicUrl =
+          client.storage
+          .from(BUCKET)
+          .getPublicUrl(
+            file.name
+          )
+          .data
+          .publicUrl;
+
+
+        const item =
+          document.createElement(
+            "div"
+          );
+
+
+        item.className =
+          "item";
+
+
+        if(
+          isVideo(
+            file.name
+          )
+        ){
+
+          item.innerHTML = `
+
+            <video
+              controls
+              preload="metadata"
+              src="${escapeAttr(publicUrl)}">
+            </video>
+
+            <div class="filename">
+              ${escapeHtml(file.name)}
+            </div>
+
+            <button
+              class="danger"
+              onclick="deleteFile('${escapeJs(file.name)}')">
+              حذف
+            </button>
+
+          `;
+
+        }else{
+
+          item.innerHTML = `
+
+            <img
+              loading="lazy"
+              src="${escapeAttr(publicUrl)}"
+              alt="HMD Décor">
+
+            <div class="filename">
+              ${escapeHtml(file.name)}
+            </div>
+
+            <button
+              class="danger"
+              onclick="deleteFile('${escapeJs(file.name)}')">
+              حذف
+            </button>
+
+          `;
+
+        }
+
+
+        list.appendChild(
+          item
+        );
+
+      }
+    );
+
+
+  }catch(error){
+
+    list.innerHTML =
+      '<div class="status error">' +
+      escapeHtml(
+        error.message
+      ) +
+      '</div>';
+
+  }
+
+}
+
+
+/* =========================
+   حذف الملفات
+========================= */
+
+async function deleteFile(name){
+
+  if(
+    !confirm(
+      "هل أنت متأكد من حذف هذا الملف؟"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  const result =
+    await client.storage
+    .from(BUCKET)
+    .remove([
+      name
+    ]);
+
+
+  if(result.error){
+
+    alert(
+      "لم يتم الحذف.\n\n" +
+      result.error.message
+    );
+
+    return;
+
+  }
+
+
+  await loadFiles();
+
+}
+
+
+/* =========================
+   أدوات
+========================= */
+
+function isVideo(name){
+
+  const ext =
+    name
+    .split(".")
+    .pop()
+    .toLowerCase();
+
+
+  return [
+    "mp4",
+    "webm",
+    "ogg",
+    "mov",
+    "m4v"
+  ].includes(ext);
+
+}
+
+
+function escapeHtml(value){
+
+  return String(value)
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+function escapeAttr(value){
+
+  return escapeHtml(value);
+
+}
+
+
+function escapeJs(value){
+
+  return String(value)
+    .replace(
+      /\\/g,
+      "\\\\"
+    )
+    .replace(
+      /'/g,
+      "\\'"
+    )
+    .replace(
+      /"/g,
+      '\\"'
+    )
+    .replace(
+      /\n/g,
+      "\\n"
+    )
+    .replace(
+      /\r/g,
+      "\\r"
+    );
+
+}
+
+
+/* =========================
+   مراقبة حالة الدخول
+========================= */
+
+if(client){
+
+  client.auth.onAuthStateChange(
+    (event, session) => {
+
+      if(session){
+
+        showAdmin(
+          session.user
+        );
+
+      }else{
+
+        showLogin();
+
+      }
+
+    }
+  );
+
+}
+
+</script>
+
+</body>
+</html>
