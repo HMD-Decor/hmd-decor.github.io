@@ -7,7 +7,9 @@
 <title>HMD Décor | تسجيل الدخول</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
 body{
   margin:0;
@@ -86,8 +88,9 @@ button:disabled{
 #message{
   text-align:center;
   margin-top:18px;
-  color:#e57373;
   min-height:20px;
+  color:#e57373;
+  line-height:1.6;
 }
 
 .back{
@@ -104,7 +107,9 @@ button:disabled{
 
 <div class="login-box">
 
-  <div class="logo">HMD Décor</div>
+  <div class="logo">
+    HMD Décor
+  </div>
 
   <div class="subtitle">
     🔐 الدخول إلى لوحة الإدارة
@@ -112,25 +117,34 @@ button:disabled{
 
   <form id="loginForm">
 
-    <label>البريد الإلكتروني</label>
+    <label for="email">
+      البريد الإلكتروني
+    </label>
 
     <input
       type="email"
       id="email"
       placeholder="أدخل بريدك الإلكتروني"
+      autocomplete="username"
       required
     >
 
-    <label>كلمة المرور</label>
+    <label for="password">
+      كلمة المرور
+    </label>
 
     <input
       type="password"
       id="password"
       placeholder="أدخل كلمة المرور"
+      autocomplete="current-password"
       required
     >
 
-    <button type="submit" id="loginButton">
+    <button
+      type="submit"
+      id="loginButton"
+    >
       دخول
     </button>
 
@@ -149,11 +163,26 @@ button:disabled{
 
 <script>
 
-const message = document.getElementById("message");
-const loginForm = document.getElementById("loginForm");
-const loginButton = document.getElementById("loginButton");
+const ADMIN_EMAIL = "midomidox447@gmail.com";
+
+const ADMIN_UID =
+  "03459448-2358-4234-a132-edb18b822795";
+
+const message =
+  document.getElementById("message");
+
+const loginForm =
+  document.getElementById("loginForm");
+
+const loginButton =
+  document.getElementById("loginButton");
 
 let client = null;
+
+
+/* =========================
+   إنشاء اتصال Supabase
+========================= */
 
 try{
 
@@ -163,121 +192,301 @@ try{
     !window.HMD_CONFIG.SUPABASE_ANON_KEY
   ){
 
-    throw new Error("إعدادات Supabase غير موجودة");
+    throw new Error(
+      "إعدادات Supabase غير موجودة"
+    );
 
   }
 
   if(
-    typeof supabase === "undefined" ||
-    !supabase.createClient
+    !window.supabase ||
+    !window.supabase.createClient
   ){
 
-    throw new Error("مكتبة Supabase لم يتم تحميلها");
+    throw new Error(
+      "مكتبة Supabase لم يتم تحميلها"
+    );
 
   }
 
-  client = supabase.createClient(
-    window.HMD_CONFIG.SUPABASE_URL,
-    window.HMD_CONFIG.SUPABASE_ANON_KEY
-  );
+  client =
+    window.supabase.createClient(
+      window.HMD_CONFIG.SUPABASE_URL,
+      window.HMD_CONFIG.SUPABASE_ANON_KEY,
+      {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:false
+        }
+      }
+    );
 
 }catch(error){
 
-  console.error(error);
+  console.error(
+    "Supabase initialization error:",
+    error
+  );
+
+  message.style.color = "#e57373";
 
   message.textContent =
     "❌ تعذر الاتصال بالنظام. تأكد من ملفات الموقع.";
 
 }
 
-loginForm.addEventListener("submit", async function(e){
 
-  e.preventDefault();
+/* =========================
+   تسجيل الدخول
+========================= */
 
-  if(!client){
+loginForm.addEventListener(
+  "submit",
+  async function(e){
 
-    message.textContent =
-      "❌ النظام غير جاهز. أعد تحميل الصفحة.";
+    e.preventDefault();
 
-    return;
-
-  }
-
-  const email =
-    document.getElementById("email").value.trim();
-
-  const password =
-    document.getElementById("password").value;
-
-  message.style.color = "#c9a45c";
-  message.textContent = "جاري تسجيل الدخول...";
-
-  loginButton.disabled = true;
-
-  try{
-
-    const { data, error } =
-      await client.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
-    if(error){
-
-      console.error(error);
+    if(!client){
 
       message.style.color = "#e57373";
 
       message.textContent =
-        "❌ البريد الإلكتروني أو كلمة المرور غير صحيحة.";
-
-      loginButton.disabled = false;
+        "❌ النظام غير جاهز. أعد تحميل الصفحة.";
 
       return;
+
     }
+
+    const email =
+      document
+      .getElementById("email")
+      .value
+      .trim();
+
+    const password =
+      document
+      .getElementById("password")
+      .value;
+
+
+    /* فحص البريد */
 
     if(
-      !data ||
-      !data.user ||
-      data.user.email !== "midomidox447@gmail.com"
+      email.toLowerCase() !==
+      ADMIN_EMAIL.toLowerCase()
     ){
-
-      await client.auth.signOut();
 
       message.style.color = "#e57373";
 
       message.textContent =
-        "⛔ هذا الحساب غير مصرح له بالدخول.";
+        "⛔ هذا البريد غير مصرح له بالدخول.";
+
+      return;
+
+    }
+
+
+    message.style.color = "#c9a45c";
+
+    message.textContent =
+      "⏳ جاري تسجيل الدخول...";
+
+    loginButton.disabled = true;
+
+
+    try{
+
+      /* تسجيل الدخول */
+
+      const { data, error } =
+        await client.auth.signInWithPassword({
+
+          email: email,
+
+          password: password
+
+        });
+
+
+      /* خطأ Supabase */
+
+      if(error){
+
+        console.error(
+          "Login error:",
+          error
+        );
+
+        message.style.color =
+          "#e57373";
+
+        message.textContent =
+          "❌ " + (
+            error.message ||
+            "فشل تسجيل الدخول."
+          );
+
+        loginButton.disabled = false;
+
+        return;
+
+      }
+
+
+      /* التأكد من وجود المستخدم */
+
+      if(
+        !data ||
+        !data.user
+      ){
+
+        message.style.color =
+          "#e57373";
+
+        message.textContent =
+          "❌ لم يتم العثور على بيانات المستخدم.";
+
+        loginButton.disabled = false;
+
+        return;
+
+      }
+
+
+      /* التأكد من وجود الجلسة */
+
+      if(!data.session){
+
+        message.style.color =
+          "#e57373";
+
+        message.textContent =
+          "❌ تم التحقق من الحساب لكن لم يتم إنشاء الجلسة.";
+
+        loginButton.disabled = false;
+
+        return;
+
+      }
+
+
+      /* التحقق من البريد */
+
+      if(
+        !data.user.email ||
+        data.user.email.toLowerCase() !==
+        ADMIN_EMAIL.toLowerCase()
+      ){
+
+        await client.auth.signOut();
+
+        message.style.color =
+          "#e57373";
+
+        message.textContent =
+          "⛔ هذا الحساب غير مصرح له.";
+
+        loginButton.disabled = false;
+
+        return;
+
+      }
+
+
+      /* التحقق من UID */
+
+      if(
+        data.user.id !== ADMIN_UID
+      ){
+
+        console.error(
+          "UID mismatch:",
+          data.user.id
+        );
+
+        await client.auth.signOut();
+
+        message.style.color =
+          "#e57373";
+
+        message.textContent =
+          "⛔ حساب الإدارة غير مطابق.";
+
+        loginButton.disabled = false;
+
+        return;
+
+      }
+
+
+      /* =========================
+         كل شيء صحيح
+      ========================= */
+
+      message.style.color =
+        "#7bd88f";
+
+      message.textContent =
+        "✅ تم الدخول بنجاح... جاري فتح لوحة الإدارة";
+
+
+      /* التأكد مرة أخرى أن الجلسة محفوظة */
+
+      const {
+        data: sessionData
+      } =
+        await client.auth.getSession();
+
+
+      if(
+        !sessionData ||
+        !sessionData.session
+      ){
+
+        message.style.color =
+          "#e57373";
+
+        message.textContent =
+          "❌ تعذر حفظ جلسة الدخول.";
+
+        loginButton.disabled = false;
+
+        return;
+
+      }
+
+
+      /* الانتقال إلى لوحة الإدارة */
+
+      setTimeout(function(){
+
+        window.location.replace(
+          "admin.html"
+        );
+
+      },800);
+
+
+    }catch(error){
+
+      console.error(
+        "Unexpected login error:",
+        error
+      );
+
+      message.style.color =
+        "#e57373";
+
+      message.textContent =
+        "❌ حدث خطأ أثناء الاتصال. حاول مرة أخرى.";
 
       loginButton.disabled = false;
 
-      return;
     }
 
-    message.style.color = "#7bd88f";
-    message.textContent =
-      "✅ تم الدخول بنجاح...";
-
-    setTimeout(function(){
-
-      window.location.href = "admin.html";
-
-    }, 500);
-
-  }catch(error){
-
-    console.error(error);
-
-    message.style.color = "#e57373";
-
-    message.textContent =
-      "❌ حدث خطأ أثناء الاتصال. حاول مرة أخرى.";
-
-    loginButton.disabled = false;
-
   }
-
-});
+);
 
 </script>
 
