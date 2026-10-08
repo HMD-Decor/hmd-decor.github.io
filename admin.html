@@ -15,7 +15,9 @@
   --danger:#762b2b;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
 body{
   margin:0;
@@ -44,11 +46,6 @@ body{
   margin:0;
 }
 
-a{
-  color:var(--g);
-  text-decoration:none;
-}
-
 .panel{
   background:var(--c);
   border:1px solid var(--b);
@@ -65,6 +62,11 @@ a{
 .login h1{
   text-align:center;
   color:var(--g);
+}
+
+a{
+  color:var(--g);
+  text-decoration:none;
 }
 
 .grid{
@@ -128,13 +130,8 @@ button:disabled{
   color:#111;
   padding:9px 15px;
   border-radius:6px;
-  text-decoration:none;
   font-weight:bold;
   margin:0 5px;
-}
-
-.siteButton:hover{
-  opacity:.9;
 }
 
 .media{
@@ -242,6 +239,10 @@ button:disabled{
 
 <body>
 
+<!-- =========================
+     صفحة الدخول
+========================= -->
+
 <div id="loginArea" class="wrap">
 
   <div class="panel login">
@@ -272,7 +273,9 @@ button:disabled{
       autocomplete="current-password"
     >
 
-    <button onclick="login()">
+    <button
+      id="loginButton"
+      onclick="login()">
       دخول
     </button>
 
@@ -282,6 +285,10 @@ button:disabled{
 
 </div>
 
+
+<!-- =========================
+     لوحة الإدارة
+========================= -->
 
 <div id="adminArea">
 
@@ -312,9 +319,13 @@ button:disabled{
 </div>
 
 
+<!-- =========================
+     إعدادات الموقع
+========================= -->
+
 <div class="panel">
 
-<h2>إعدادات الاتصال</h2>
+<h2>⚙️ إعدادات الاتصال</h2>
 
 <div class="grid">
 
@@ -355,9 +366,13 @@ button:disabled{
 </div>
 
 
+<!-- =========================
+     الصور والفيديوهات
+========================= -->
+
 <div class="panel">
 
-<h2>الصور والفيديوهات</h2>
+<h2>🖼️ الصور والفيديوهات</h2>
 
 <p class="muted">
 الصور والفيديوهات يتم تخزينها في Supabase Storage.
@@ -383,9 +398,13 @@ button:disabled{
 </div>
 
 
+<!-- =========================
+     حالة الاتصال
+========================= -->
+
 <div class="panel">
 
-<h2>حالة الربط</h2>
+<h2>🔗 حالة الربط</h2>
 
 <p id="connectionStatus" class="status">
 جاري تشغيل لوحة الإدارة...
@@ -407,7 +426,7 @@ button:disabled{
 
 
 /* =========================
-   إعدادات الإدارة
+   معلومات المالك
 ========================= */
 
 const ADMIN_EMAIL =
@@ -429,9 +448,9 @@ let adminReady = false;
 
 
 const statusBox =
-document.getElementById(
-  "connectionStatus"
-);
+  document.getElementById(
+    "connectionStatus"
+  );
 
 
 function setStatus(
@@ -452,78 +471,108 @@ function setStatus(
 
 
 /* =========================
-   التحقق من الإعدادات
+   تشغيل Supabase
 ========================= */
 
-if(
-  !window.HMD_CONFIG
-){
+function initSupabase(){
 
-  document.getElementById(
-    "loginStatus"
-  ).textContent =
-    "❌ لم يتم تحميل config.js.";
-
-}else if(
-  !window.HMD_CONFIG.SUPABASE_URL
-){
-
-  document.getElementById(
-    "loginStatus"
-  ).textContent =
-    "❌ SUPABASE_URL غير موجود.";
-
-}else if(
-  !window.HMD_CONFIG.SUPABASE_ANON_KEY
-){
-
-  document.getElementById(
-    "loginStatus"
-  ).textContent =
-    "❌ SUPABASE_ANON_KEY غير موجود.";
-
-}else if(
-  !window.HMD_CONFIG.STORAGE_BUCKET
-){
-
-  document.getElementById(
-    "loginStatus"client =
-    window.supabase.createClient(
-      window.HMD_CONFIG.SUPABASE_URL,
-      window.HMD_CONFIG.SUPABASE_ANON_KEY
+  const loginStatus =
+    document.getElementById(
+      "loginStatus"
     );
-// حماية لوحة الإدارة
-(async function(){
 
-  const {
-    data: { session }
-  } = await client.auth.getSession();
 
-  if(!session){
-    window.location.href = "login.html";
-    return;
+  if(!window.HMD_CONFIG){
+
+    loginStatus.textContent =
+      "❌ ملف config.js غير موجود.";
+
+    return false;
+
   }
+
 
   if(
-    session.user.id !== ADMIN_UID ||
-    session.user.email !== ADMIN_EMAIL
+    !window.HMD_CONFIG.SUPABASE_URL
   ){
-    await client.auth.signOut();
-    window.location.href = "login.html";
-    return;
+
+    loginStatus.textContent =
+      "❌ SUPABASE_URL غير موجود.";
+
+    return false;
+
   }
 
-})();
-  BUCKET =
-    window.HMD_CONFIG.STORAGE_BUCKET;
 
-  window.HMD_SUPABASE =
-    client;
+  if(
+    !window.HMD_CONFIG.SUPABASE_ANON_KEY
+  ){
 
-  window.HMD_BUCKET =
-    BUCKET;
+    loginStatus.textContent =
+      "❌ SUPABASE_ANON_KEY غير موجود.";
 
-  checkSession();
+    return false;
+
+  }
+
+
+  if(
+    !window.HMD_CONFIG.STORAGE_BUCKET
+  ){
+
+    loginStatus.textContent =
+      "❌ STORAGE_BUCKET غير موجود.";
+
+    return false;
+
+  }
+
+
+  if(
+    typeof supabase === "undefined"
+  ){
+
+    loginStatus.textContent =
+      "❌ مكتبة Supabase لم يتم تحميلها.";
+
+    return false;
+
+  }
+
+
+  try{
+
+    client =
+      supabase.createClient(
+        window.HMD_CONFIG.SUPABASE_URL,
+        window.HMD_CONFIG.SUPABASE_ANON_KEY
+      );
+
+
+    BUCKET =
+      window.HMD_CONFIG.STORAGE_BUCKET;
+
+
+    window.HMD_SUPABASE =
+      client;
+
+    window.HMD_BUCKET =
+      BUCKET;
+
+
+    return true;
+
+
+  }catch(error){
+
+    console.error(error);
+
+    loginStatus.textContent =
+      "❌ تعذر تشغيل Supabase.";
+
+    return false;
+
+  }
 
 }
 
@@ -536,10 +585,12 @@ async function checkSession(){
 
   if(!client) return;
 
+
   try{
 
     const result =
       await client.auth.getSession();
+
 
     if(result.error){
 
@@ -547,21 +598,20 @@ async function checkSession(){
         result.error
       );
 
-      document.getElementById(
-        "loginStatus"
-      ).textContent =
-        "❌ تعذر التحقق من تسجيل الدخول.";
+      showLogin();
 
       return;
 
     }
 
+
     const session =
       result.data.session;
 
+
     if(session){
 
-      showAdmin(
+      await showAdmin(
         session.user
       );
 
@@ -571,34 +621,15 @@ async function checkSession(){
 
     }
 
+
   }catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
-    document.getElementById(
-      "loginStatus"
-    ).textContent =
-      "❌ حدث خطأ في الاتصال.";
+    showLogin();
 
   }
 
-  ).textContent =
-    "❌ STORAGE_BUCKET غير موجود.";
-
-}else if(
-  !window.supabase
-){
-
-  document.getElementById(
-    "loginStatus"
-  ).textContent =
-    "❌ مكتبة Supabase لم يتم تحميلها.";
-
-}else{
-
-  
 }
 
 
@@ -608,21 +639,41 @@ async function checkSession(){
 
 async function login(){
 
-  if(!client) return;
+  if(!client){
+
+    return;
+
+  }
+
 
   const email =
-    document.getElementById(
+    document
+    .getElementById(
       "loginEmail"
-    ).value.trim();
+    )
+    .value
+    .trim();
+
 
   const password =
-    document.getElementById(
+    document
+    .getElementById(
       "loginPassword"
-    ).value;
+    )
+    .value;
+
 
   const status =
-    document.getElementById(
+    document
+    .getElementById(
       "loginStatus"
+    );
+
+
+  const button =
+    document
+    .getElementById(
+      "loginButton"
     );
 
 
@@ -646,6 +697,9 @@ async function login(){
     "جاري تسجيل الدخول...";
 
 
+  button.disabled = true;
+
+
   try{
 
     const result =
@@ -660,28 +714,62 @@ async function login(){
 
     if(result.error){
 
+      console.error(
+        result.error
+      );
+
       status.className =
         "status error";
 
       status.textContent =
-        "❌ " +
-        result.error.message;
+        "❌ البريد الإلكتروني أو كلمة السر غير صحيحة.";
+
+      button.disabled = false;
 
       return;
 
     }
 
 
-    showAdmin(
-      result.data.user
-    );
+    const user =
+      result.data.user;
+
+
+    if(
+      !user ||
+      user.id !== ADMIN_UID ||
+      user.email !== ADMIN_EMAIL
+    ){
+
+      await client.auth.signOut();
+
+
+      status.className =
+        "status error";
+
+      status.textContent =
+        "⛔ هذا الحساب غير مصرح له بالدخول.";
+
+      button.disabled = false;
+
+      return;
+
+    }
+
+
+    status.className =
+      "status";
+
+    status.textContent =
+      "✅ تم الدخول بنجاح...";
+
+
+    await showAdmin(user);
 
 
   }catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     status.className =
       "status error";
@@ -691,11 +779,14 @@ async function login(){
 
   }
 
+
+  button.disabled = false;
+
 }
 
 
 /* =========================
-   التحقق الحقيقي من المدير
+   التحقق من المدير
 ========================= */
 
 async function showAdmin(user){
@@ -705,10 +796,6 @@ async function showAdmin(user){
     user.id !== ADMIN_UID ||
     user.email !== ADMIN_EMAIL
   ){
-
-    alert(
-      "⛔ غير مصرح لك بالدخول إلى لوحة الإدارة."
-    );
 
     await client.auth.signOut();
 
@@ -760,12 +847,13 @@ async function showAdmin(user){
 
 
 /* =========================
-   إظهار صفحة الدخول
+   صفحة الدخول
 ========================= */
 
 function showLogin(){
 
   adminReady = false;
+
 
   document.getElementById(
     "loginArea"
@@ -789,7 +877,9 @@ async function logout(){
 
   if(!client) return;
 
+
   await client.auth.signOut();
+
 
   showLogin();
 
@@ -804,38 +894,18 @@ async function checkConnection(){
 
   if(!client) return;
 
+
   try{
 
-    const timeout =
-      new Promise(
-        (_,reject) => {
-
-          setTimeout(
-            () => reject(
-              new Error(
-                "انتهت مهلة الاتصال."
-              )
-            ),
-            10000
-          );
-
+    const result =
+      await client.storage
+      .from(BUCKET)
+      .list(
+        "",
+        {
+          limit:1
         }
       );
-
-
-    const request =
-      client.storage
-      .from(BUCKET)
-      .list("",{
-        limit:1
-      });
-
-
-    const result =
-      await Promise.race([
-        request,
-        timeout
-      ]);
 
 
     if(result.error){
@@ -861,9 +931,7 @@ async function checkConnection(){
 
   }catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     setStatus(
       "❌ فشل الاتصال: " +
@@ -877,7 +945,7 @@ async function checkConnection(){
 
 
 /* =========================
-   الإعدادات
+   الإعدادات الافتراضية
 ========================= */
 
 const defaultSettings = {
@@ -950,9 +1018,7 @@ async function loadSettings(){
 
   }catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
   }
 
@@ -997,10 +1063,12 @@ async function saveSettings(){
 
   if(!client) return;
 
+
   const status =
     document.getElementById(
       "settingsStatus"
     );
+
 
   const button =
     document.getElementById(
@@ -1108,9 +1176,7 @@ async function saveSettings(){
 
   }catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     status.className =
       "status error";
@@ -1135,20 +1201,24 @@ async function uploadFiles(){
 
   if(!client) return;
 
+
   const input =
     document.getElementById(
       "files"
     );
+
 
   const status =
     document.getElementById(
       "uploadStatus"
     );
 
+
   const button =
     document.getElementById(
       "uploadButton"
     );
+
 
   const files =
     [...input.files];
@@ -1177,8 +1247,9 @@ async function uploadFiles(){
   button.disabled = true;
 
 
-  let success=0;
-  let failed=0;
+  let success = 0;
+
+  let failed = 0;
 
 
   for(
@@ -1240,9 +1311,7 @@ async function uploadFiles(){
 
     }catch(error){
 
-      console.error(
-        error
-      );
+      console.error(error);
 
       failed++;
 
@@ -1251,7 +1320,7 @@ async function uploadFiles(){
   }
 
 
-  input.value="";
+  input.value = "";
 
 
   status.className =
@@ -1288,6 +1357,7 @@ async function uploadFiles(){
 async function loadFiles(){
 
   if(!client) return;
+
 
   const list =
     document.getElementById(
@@ -1346,14 +1416,13 @@ async function loadFiles(){
     }
 
 
-    list.innerHTML="";
+    list.innerHTML = "";
 
 
     files.forEach(
       file => {
 
-        if(!file.name)
-          return;
+        if(!file.name) return;
 
 
         const publicUrl =
@@ -1426,9 +1495,7 @@ async function loadFiles(){
         }
 
 
-        list.appendChild(
-          item
-        );
+        list.appendChild(item);
 
       }
     );
@@ -1517,26 +1584,11 @@ function isVideo(name){
 function escapeHtml(value){
 
   return String(value)
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 
 }
 
@@ -1551,42 +1603,37 @@ function escapeAttr(value){
 function escapeJs(value){
 
   return String(value)
-    .replace(
-      /\\/g,
-      "\\\\"
-    )
-    .replace(
-      /'/g,
-      "\\'"
-    )
-    .replace(
-      /"/g,
-      '\\"'
-    )
-    .replace(
-      /\n/g,
-      "\\n"
-    )
-    .replace(
-      /\r/g,
-      "\\r"
-    );
+    .replace(/\\/g,"\\\\")
+    .replace(/'/g,"\\'")
+    .replace(/"/g,'\\"')
+    .replace(/\n/g,"\\n")
+    .replace(/\r/g,"\\r");
 
 }
 
 
 /* =========================
-   مراقبة تسجيل الدخول
+   بدء لوحة الإدارة
 ========================= */
 
-if(client){
+async function startAdmin(){
+
+  if(!initSupabase()){
+
+    return;
+
+  }
+
+
+  await checkSession();
+
 
   client.auth.onAuthStateChange(
-    (event, session) => {
+    async function(event, session){
 
       if(session){
 
-        showAdmin(
+        await showAdmin(
           session.user
         );
 
@@ -1600,6 +1647,9 @@ if(client){
   );
 
 }
+
+
+startAdmin();
 
 </script>
 
