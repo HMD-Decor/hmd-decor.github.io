@@ -242,11 +242,6 @@ button:disabled{
 
 <body>
 
-
-<!-- =========================
-     تسجيل الدخول
-========================= -->
-
 <div id="loginArea" class="wrap">
 
   <div class="panel login">
@@ -288,10 +283,6 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     لوحة الإدارة
-========================= -->
-
 <div id="adminArea">
 
 <div class="wrap">
@@ -320,10 +311,6 @@ button:disabled{
 
 </div>
 
-
-<!-- =========================
-     إعدادات الاتصال
-========================= -->
 
 <div class="panel">
 
@@ -368,10 +355,6 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     الصور والفيديوهات
-========================= -->
-
 <div class="panel">
 
 <h2>الصور والفيديوهات</h2>
@@ -400,10 +383,6 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     حالة الربط
-========================= -->
-
 <div class="panel">
 
 <h2>حالة الربط</h2>
@@ -422,10 +401,20 @@ button:disabled{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
-
 <script>
 
 "use strict";
+
+
+/* =========================
+   إعدادات الإدارة
+========================= */
+
+const ADMIN_EMAIL =
+  "midomidox447@gmail.com";
+
+const ADMIN_UID =
+  "03459448-2358-4234-a132-edb18b822795";
 
 
 /* =========================
@@ -534,7 +523,7 @@ if(
 
 
 /* =========================
-   التحقق من تسجيل الدخول
+   التحقق من الجلسة
 ========================= */
 
 async function checkSession(){
@@ -598,11 +587,7 @@ async function checkSession(){
 
 async function login(){
 
-  if(!client){
-
-    return;
-
-  }
+  if(!client) return;
 
   const email =
     document.getElementById(
@@ -613,7 +598,6 @@ async function login(){
     document.getElementById(
       "loginPassword"
     ).value;
-
 
   const status =
     document.getElementById(
@@ -690,10 +674,29 @@ async function login(){
 
 
 /* =========================
-   عرض لوحة الإدارة
+   التحقق الحقيقي من المدير
 ========================= */
 
 async function showAdmin(user){
+
+  if(
+    !user ||
+    user.id !== ADMIN_UID ||
+    user.email !== ADMIN_EMAIL
+  ){
+
+    alert(
+      "⛔ غير مصرح لك بالدخول إلى لوحة الإدارة."
+    );
+
+    await client.auth.signOut();
+
+    showLogin();
+
+    return;
+
+  }
+
 
   document.getElementById(
     "loginArea"
@@ -736,7 +739,7 @@ async function showAdmin(user){
 
 
 /* =========================
-   إظهار الدخول
+   إظهار صفحة الدخول
 ========================= */
 
 function showLogin(){
@@ -873,7 +876,7 @@ const defaultSettings = {
 
 
 /* =========================
-   تحميل الإعدادات من Supabase
+   تحميل الإعدادات
 ========================= */
 
 async function loadSettings(){
@@ -966,23 +969,17 @@ async function loadSettings(){
 
 
 /* =========================
-   حفظ الإعدادات في Supabase
+   حفظ الإعدادات
 ========================= */
 
 async function saveSettings(){
 
-  if(!client){
-
-    return;
-
-  }
-
+  if(!client) return;
 
   const status =
     document.getElementById(
       "settingsStatus"
     );
-
 
   const button =
     document.getElementById(
@@ -994,57 +991,47 @@ async function saveSettings(){
 
     {
       key:"phone",
-
       value:
         document
         .getElementById("phone")
         .value
         .trim()
-
     },
 
     {
       key:"wa",
-
       value:
         document
         .getElementById("wa")
         .value
         .trim()
-
     },
 
     {
       key:"email",
-
       value:
         document
         .getElementById("email")
         .value
         .trim()
-
     },
 
     {
       key:"address",
-
       value:
         document
         .getElementById("address")
         .value
         .trim()
-
     },
 
     {
       key:"hero",
-
       value:
         document
         .getElementById("hero")
         .value
         .trim()
-
     }
 
   ];
@@ -1127,24 +1114,20 @@ async function uploadFiles(){
 
   if(!client) return;
 
-
   const input =
     document.getElementById(
       "files"
     );
-
 
   const status =
     document.getElementById(
       "uploadStatus"
     );
 
-
   const button =
     document.getElementById(
       "uploadButton"
     );
-
 
   const files =
     [...input.files];
@@ -1174,7 +1157,6 @@ async function uploadFiles(){
 
 
   let success=0;
-
   let failed=0;
 
 
@@ -1285,7 +1267,6 @@ async function uploadFiles(){
 async function loadFiles(){
 
   if(!client) return;
-
 
   const list =
     document.getElementById(
@@ -1574,7 +1555,7 @@ function escapeJs(value){
 
 
 /* =========================
-   مراقبة حالة الدخول
+   مراقبة تسجيل الدخول
 ========================= */
 
 if(client){
